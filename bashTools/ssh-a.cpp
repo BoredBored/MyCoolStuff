@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <vector>
 #include <unistd.h>
@@ -9,34 +9,19 @@
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
 
-
-using namespace std;
-
 //https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
 // trim from start (in place)
 
 std::string remove_whitespaces(std::string &str){
     boost::trim(str);
-    std::regex e ("[ ](?=[^!-~])");
-    return std::regex_replace (str, e, "");
+    return std::regex_replace (str, std::regex("[ ](?=[^!-~])"), "");
 }
 
-/*
-void split(const std::string& s, char delimiter, std::vector<std::string> &tokens)
-{
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter))
-    {
-        tokens.push_back(token);
-    }
-}*/
-
-void say(std::string str){
-    cout << str + '\n';
+void say(std::string& str){
+    std::cout << str + '\n';
 }
 
-std::string basename( std::string const& pathname )
+std::string basename(const std::string& pathname )
 {
     struct MatchPathSeparator
     {
@@ -51,7 +36,7 @@ std::string basename( std::string const& pathname )
                 pathname.end() );
 }
 
-void help(std::string pname, int exitstat){
+void help(std::string& pname, int exitstat){
     pname=basename(pname);
     //pname=pname.replace(pname.begin(),pname.end(), "/");
     say("The purpose of this is is to retreave a user@ip string from a file based on a given alias");
@@ -65,7 +50,7 @@ void help(std::string pname, int exitstat){
     say("[--rename/-r]    [IP] [new alias]    Add ip (and alias)");
     say("");
     say("If you find a bug contact me at");
-    say("      Alexios Angeletakis <aangeletakis@gmail.com>");
+    say("      Alex Angel <https://github.com/BoredBored/MyCoolStuff/>");
     exit(exitstat);
 }
 
@@ -78,13 +63,13 @@ bool file_exists (const std::string& name) {
     }
 }
 
-vector<string> split(string str, string token){
+vector<string> split(std::string& str,std::string& token){
     vector<string>result;
     boost::split(result, str,boost::is_any_of(token));
     return result;
 }
 
-bool validIP(std::string ip){
+bool validIP(std::string& ip){
     boost::system::error_code ec;
     boost::asio::ip::address::from_string( ip, ec );
     if ( ec ){
@@ -94,7 +79,7 @@ bool validIP(std::string ip){
     }
 }
 
-void writeFile(std::vector< std::vector< std::string > > &filevec, std::string sshAliasFile){
+void writeFile(std::vector<std::vector<std::string>>& filevec, std::string& sshAliasFile){
     std::string tmpfile = "";
     for(unsigned int y = 0; y < filevec.size(); y++){
         std::string line = "";
@@ -103,7 +88,7 @@ void writeFile(std::vector< std::vector< std::string > > &filevec, std::string s
         }
         tmpfile += line + (y == filevec.size()-1 ? "" : "\n");
     }
-    ofstream sshfile;
+    std::ofstream sshfile;
     sshfile.open(sshAliasFile);
     if(sshfile){
         sshfile << tmpfile;
@@ -185,6 +170,7 @@ int main(int argc, char *argv[] ){
         //These extra brakets are here to dealocate memory from things that im not going to use later
 
         std::vector<std::string> lines;
+        //put in a new scope to dealocate left over memory
         {
             std::string line = "";
             std::ifstream sshfile;
