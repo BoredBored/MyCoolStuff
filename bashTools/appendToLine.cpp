@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 
-void help(std::string pname){
+void help(std::string& pname){
 	std::cout<<"usage: "<< pname <<" [string] [string to add to each line]\n";
 }
 
