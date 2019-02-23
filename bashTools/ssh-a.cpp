@@ -18,7 +18,7 @@ std::string remove_whitespaces(std::string &str){
 }
 
 void say(std::string& str){
-    std::cout << str + '\n';
+    std::cout << str << '\n';
 }
 
 std::string basename(const std::string& pathname )
