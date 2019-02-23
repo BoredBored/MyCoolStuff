@@ -26,14 +26,14 @@ bool isinteger(std::string const& n) noexcept
     return false;
 }
 
-std::string multiplyStr(int num, std::string str){
+std::string multiplyStr(int num, std::string& str){
 	std::string stry = "";
 	for(int i=0; i < num; i++){
 		stry += str;
 	}
 	return stry;
 }
-void help(std::string pname){
+void help(std::string& pname){
 	cout<<"usage: "<< pname <<" [string] [num of the string]\n";
 }
 int main(int argc, char *argv[] ){
