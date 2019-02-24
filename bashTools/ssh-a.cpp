@@ -95,7 +95,7 @@ std::string basename(const std::string& pathname )
 void help(const char* pname){
     //pname=pname.replace(pname.begin(),pname.end(), "/");
     std::cout << \
-"The purpose of this is is to retreave a user@ip string from a file based on a given alias so you don't have to remember the ip of a server to ssh into it\n\
+"Give an alias to your server's ip to make ssh easier\n\
 usage: "<<basename(pname)<<" [Option(s)] [alias(es)/ip(s)]\n\
 \n\
 [--help/-h]                          Show this help message\n\
