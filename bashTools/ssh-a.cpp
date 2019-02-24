@@ -1,164 +1,165 @@
+#include <stdio.h>
 #include <iostream>
-#include <fstream>
+#include <map>
 #include <vector>
-#include <unistd.h>
-#include <sys/types.h>
-#include <pwd.h>
-#include <regex>
-#include <boost/algorithm/string.hpp>
-#include <boost/asio.hpp>
-#include <boost/system/error_code.hpp>
+#include <algorithm>
+#include <fstream>
+#include "json_fwd.hpp"
+#include "json.hpp"
 
-//https://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring
-// trim from start (in place)
+using json = nlohmann::json;
 
-void say(std::string& str){
-    std::cout << str << '\n';
+bool isValidIPv4(const char* IPAddress);
+
+const std::map<std::string, int> options {
+    {"-h", 0},
+    {"--help", 0},
+    {"-f", 1},
+    {"--find", 1},
+    {"-e", 2},
+    {"--exists", 2},
+    {"-d", 3},
+    {"--delete", 3},
+    {"-a", 4},
+    {"--add", 4},
+    {"-r", 5},
+    {"--rename", 5},
+};
+
+enum OPERATIONS {
+  FIND,
+  EXISTS,
+  DELETE,
+  ADD,
+  RENAME
+};
+
+void find(std::vector<std::string>& data, json& filejson){
+//      std::cout<<"find\n";
+//      std::cout <<"Num of ips "<< filejson.size() << '\n';
+        for(unsigned int d=0;d<data.size();++d){
+                const auto& id = data[d];
+                //std::cout << id << '\n';
+                if(isValidIPv4(id.c_str())){
+                        //std::cout<<"Valid ip\n";
+                        for(unsigned int i=0;i<filejson.size();++i){
+                                if(filejson[i]["ip"]==id){
+                        //              std::cout << "FOUND\n";
+                                        if(!filejson[i]["als"].size()){
+                                                std::cout<<id<<" has no aliases\n";
+                                                return;
+                                        }
+                                        std::cout<<filejson[i]["als"][0].get<std::string>()<<'\n';
+                                        return;
+                                }
+
+                        }
+                std::cout<<id<< " ip not found\n";
+                return;
+                }
+                else {
+                        for(unsigned int i=0;i<filejson.size();++i){
+                                for(unsigned int g=0;g<filejson[i]["als"].size();++g){
+                                        auto& al=filejson[i]["als"][g];
+                                        if(id==al){
+                                                std::cout<<filejson[i]["ip"].get<std::string>()<<'\n';
+                                                return;
+                                        }
+                                }
+                        }
+                }
+        }
 }
 
-std::string basename(const std::string& pathname )
+typedef void (*functionArray)(std::vector<std::string>& data, json& filejson);
+//why use a switch when you can use an array?
+//plus more modular
+const functionArray operations[]={find};
+
+
+struct MatchPathSeparator
 {
-    struct MatchPathSeparator
-    {
         bool operator()( char ch ) const
         {
             return ch == '/';
         }
-    };
+};
+std::string basename(const std::string& pathname )
+{
     return std::string(
                 std::find_if( pathname.rbegin(), pathname.rend(),
                               MatchPathSeparator() ).base(),
                 pathname.end() );
 }
 
-void help(std::string& pname, int exitstat){
-    pname=basename(pname);
+void help(const char* pname){
     //pname=pname.replace(pname.begin(),pname.end(), "/");
-    say("The purpose of this is is to retreave a user@ip string from a file based on a given alias");
-    say("usage: "+pname+" [alias/ip] [Options]");
-    say("");
-    say("[--help/-h]                          Show this help message");
-    say("[--find/-f]      [alias]             Output ip based on alias");
-    say("[--exists/-e]    [IP] [alias]        Check if server ip exists");
-    say("[--delete/-d]    [IP]                Delete ip (and alias)");
-    say("[--add/-a]       [IP] [alias]        Add ip (and alias)");
-    say("[--rename/-r]    [IP] [new alias]    Add ip (and alias)");
-    say("");
-    say("If you find a bug contact me at");
-    say("      Alex Angel <https://github.com/BoredBored/MyCoolStuff/>");
-    exit(exitstat);
+    std::cout << \
+"The purpose of this is is to retreave a user@ip string from a file based on a given alias so you don't have to remember the ip of a server to ssh into it\n\
+usage: "<<basename(pname)<<" [Option(s)] [alias(es)/ip(s)]\n\
+\n\
+[--help/-h]                          Show this help message\n\
+[--find/-f]      [alias]             Output ip based on alias\n\
+[--exists/-e]    [IP] [alias]        Check if server ip exists\n\
+[--delete/-d]    [IP]                Delete ip (and alias)\n\
+[--add/-a]       [IP] [alias]        Add ip (and alias)\n\
+[--rename/-r]    [IP] [new alias]    Add ip (and alias)\n\
+\n\
+If you find a bug contact me at\n\
+      Alex Angel <https://github.com/BoredBored/MyCoolStuff/>\n";
 }
 
-bool file_exists (const std::string& name) {
-    if (FILE *file = fopen(name.c_str(), "r")) {
-        fclose(file);
-        return true;
-    } else {
-        return false;
-    }
+bool isValidIPv4(const char* IPAddress)
+{
+   unsigned int a,b,c,d;
+   return sscanf(IPAddress,"%d.%d.%d.%d", &a, &b, &c, &d) == 4;
 }
 
-vector<string> split(std::string& str,std::string& token){
-    vector<string>result;
-    boost::split(result, str,boost::is_any_of(token));
-    return result;
-}
-
-bool validIP(std::string& ip){
-    boost::system::error_code ec;
-    boost::asio::ip::address::from_string( ip, ec );
-    if ( ec ){
-        return false;
-    } else {
-        return true;
+int main(int argc, char * argv[]) {
+  if (argc==1){
+        help(argv[0]);
+        return 1;
+  }
+  std::vector<int> eventQue;
+  std::vector<std::string> eventData;
+  // optData;
+  for(int i=1;i<argc;++i){
+    //
+    const std::string opt = argv[i];
+    //std::cout << i << ' '<< opt<<'\n';
+    try{
+      const int e = options.at(opt);
+      //+= faster than =
+      eventQue.push_back(e);
+      //std::cout<<"  "<<opt << " == "<<e<<'\n';
+      //help is equal to 0
+      if(!e){
+        help(argv[0]);
+        return 0;
+      }
     }
-}
-
-void writeFile(std::vector<std::vector<std::string>>& filevec, std::string& sshAliasFile){
-    std::string tmpfile = "";
-    for(unsigned int y = 0; y < filevec.size(); y++){
-        std::string line = "";
-        for(unsigned int x = 0; x < filevec[y].size(); x++){
-            line += (x && !filevec[y][x].empty() ? " ": "")+filevec[y][x];
-        }
-        tmpfile += line + (y == filevec.size()-1 ? "" : "\n");
+    catch(const std::out_of_range& err){
+      //if(isValidIPv4(opt.c_str())){
+        //std::cout<<"  "<<opt << " == ip"<<'\n';
+      //}
+      eventData.push_back(opt.c_str());
     }
-    std::ofstream sshfile;
-    sshfile.open(sshAliasFile);
-    if(sshfile){
-        sshfile << tmpfile;
-        sshfile.close();
-    } else {
-        say("Error opening ssh file");
-        exit(1);
-    }
-}
-
-int main(int argc, char *argv[] ){
-    std::string serverName = "";
-    std::string extraSrvName = "";
-    std::string ip = "";
-    bool findserv = false;
-    bool addserv = false;
-    bool delserv = false;
-    bool rename = false;
-    bool checkIfExists = false;
-
-    std::string usrIPStr = "";
-    struct passwd *pw = getpwuid(getuid());
-    const char *homedir = pw->pw_dir;
-    //pointers are weird
-    const std::string home = homedir;
-    std::string sshAliasFile = home+"/sshAlias";
-    //say(sshAliasFile);
-    //say(std::to_string(argc));
-    if (argc==1)
-    {
-        help(argv[0], 1);
-    }
-    else
-    {
-        for (int i = 1; i < argc; i++) {
-            //pointers are weird
-            std::string opt = argv[i];
-            //say(to_string(i));
-            if(opt == "--help"|| opt == "-h"){
-                help(argv[0], 0);
-            } else if (opt == "--add"|| opt == "-a"){
-                addserv = true;
-            } else if (opt == "--delete" || opt == "-d") {
-                delserv = true;
-            } else if (opt == "--exists" || opt == "-e") {
-                checkIfExists = true;
-            }  else if (opt == "--find" || opt == "-f") {
-                findserv = true;
-            } else if (opt == "--rename" || opt == "-r"){
-                rename = true;
-            } else {
-                if (argc == 2){
-                    if(validIP(opt)){
-                        ip = opt;
-                        checkIfExists = true;
-                    } else {
-                        if(serverName.empty()){
-                            serverName = opt;
-                        } else {
-                            extraSrvName = opt;
-                        }
-                        findserv = true;
-                        //i = argc;
-                    }
-                } else if(argc >= 3) {
-                    if(validIP(opt)){
-                        ip = opt;
-                    } else {
-                        serverName = opt;
-                    }
-                } else {
-                    say("Invalid options");
-                    return 1;
-                }
-            }
-        }
+  }
+  if(!eventData.size()){
+    std::cout<<"Please specify parameters\n";
+    return 1;
+  }
+  if(eventQue.size()>eventData.size()){
+          std::cout<<"Too many parameters\n";
+          return 1;
+  }
+  std::ifstream jsonFile("file.json");
+  json jsonData;
+  jsonFile >> jsonData;
+  if(!eventQue.size()){
+    operations[FIND](eventData, jsonData);
     return 0;
+  }
+  std::cout << "Executing events\n";
+  operations[FIND](eventData, jsonData);
 }
