@@ -1,0 +1,16 @@
+[
+  {
+      "ip": "127.0.0.1",
+      "als": [
+              "myalias1",
+              "myalias2"
+      ]
+  }
+  {
+      "ip": "1.1.1.1",
+      "als": [
+              "coolales1",
+              "coolales2"
+      ]
+  }
+]
