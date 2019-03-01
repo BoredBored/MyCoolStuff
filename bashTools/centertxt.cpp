@@ -37,13 +37,11 @@ void help(std::string& pname){
 	cout<<"usage: "<< pname <<" [string] [num of the string]\n";
 }
 int main(int argc, char *argv[] ){
-	if ( argc != 3 ){
-		help(argv[0]);
-	} else if(!isinteger(argv[2])){
+	if ( argc != 3 || !isinteger(argv[2]) ){
 		help(argv[0]);
 	} else {
 		int indent = std::stoi( argv[2] );
-		std::cout << multiplyStr(indent, argv[1])+'\n';
+		std::cout << multiplyStr(indent, argv[1]) << '\n';
 	}
 	return 0;
 }
