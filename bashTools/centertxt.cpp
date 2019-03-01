@@ -43,7 +43,7 @@ int main(int argc, char *argv[] ){
 		help(argv[0]);
 	} else {
 		int indent = std::stoi( argv[2] );
-		std::cout << (multiplyStr(indent, argv[1])+'\n');
+		std::cout << multiplyStr(indent, argv[1])+'\n';
 	}
 	return 0;
 }
