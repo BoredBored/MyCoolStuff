@@ -11,9 +11,9 @@ int main() {
   while (loopy) {
     std::cin >> letter;
     if (letter > 26 || letter < 1) {
-      std::cout <<
-        "I'm sorry, but I think the English Alphabet only has 26 letters.\n" <<
-        "Try again -- but this time lets see if you're a bit smarter\n";;
+      std::cout <<\
+"The English Alphabet only has 26 letters.\n\
+Try again\n";
     } else {
       DamDatLetter += 64 + letter;
       loopy = false;
