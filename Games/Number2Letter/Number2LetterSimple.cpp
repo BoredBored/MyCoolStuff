@@ -4,7 +4,7 @@ int main() {
   int letter = 0;
   std::cout << "Please type in a number: ";
 
-  while (1) {
+  while (true) {
     std::cin >> letter;
     //less than 1 or greater than 26
     if (!(letter < 1 || 26 < letter)) {
