@@ -1,23 +1,17 @@
 #include <iostream>
-#include <string>
 
 int main() {
   int letter = 0;
-  std::cout << "Please type in a number and a letter will be printed on screen corresponding to it's value in the English Alphabet" << std::endl << std::endl;
-  std::string StarterString("The letter that corosponds to that value is ");
-  std::string DamDatLetter;
+  std::cout << "Please type in a number and a letter will be printed on screen corresponding to it's value in the English Alphabet:\n\n";
 
-  bool loopy = true;
-  while (loopy) {
+  while (1) {
     std::cin >> letter;
-    if (letter > 26 || letter < 1) {
-      std::cout <<\
-"The English Alphabet only has 26 letters.\n\
-Try again\n";
+    //less than 1 or greater than 26
+    if (letter < 1 || 26 < letter) {
+      std::cout <<"The English Alphabet only has 26 letters.\nTry again\n";
     } else {
-      DamDatLetter += 64 + letter;
-      loopy = false;
+        std::cout << "\nThe letter that corosponds to that value is '" << char(64+letter) << "'\n";
+      break;
     }
   }
-  std::cout << std::endl << StarterString << '\'' << DamDatLetter << "\'\n";
 }
