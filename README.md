@@ -1,2 +1,2 @@
-# MyCoolStuff
-Stuff I've made that I want to share with the world
+# My Cool Stuff
+Stuff I've made or found that I want to share with the world
